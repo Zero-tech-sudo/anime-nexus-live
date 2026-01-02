@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AnimeNEXUS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0D1117;--surface:#161B22;--primary:#00FFFF;--accent:#FF0066;--text:#E6EDF3;--sub:#8B949E;--radius:12px;--transition:.3s ease}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif}
+    a{color:inherit;text-decoration:none}
+    button{font-family:inherit;border:none;background:none;cursor:pointer}
+    .navbar{position:fixed;top:0;left:0;width:100%;z-index:100;background:rgba(13,17,23,.8);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,255,255,.1)}
+    .nav-container{max-width:1400px;margin:0 auto;display:flex;align-items:center;padding:.75rem 1.5rem}
+    .logo{font-family:'Poppins',sans-serif;font-weight:700;font-size:1.5rem;letter-spacing:1px}
+    .logo-accent{color:var(--primary)}
+    .nav-links{display:flex;gap:2rem;margin-left:auto}
+    .nav-links a{position:relative;padding:.25rem 0;font-weight:600;color:var(--sub);transition:color var(--transition)}
+    .nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--primary);transition:width var(--transition)}
+    .nav-links a:hover{color:var(--text)}.nav-links a:hover::after{width:100%}
+    .nav-right{display:flex;align-items:center;gap:1rem;margin-left:2rem}
+    .search-icon{width:24px;height:24px;fill:var(--sub);cursor:pointer;transition:fill var(--transition)}
+    .search-icon:hover{fill:var(--primary)}
+    .login-btn{padding:.5rem 1.25rem;border:1px solid var(--primary);border-radius:var(--radius);color:var(--primary);font-weight:600;transition:background var(--transition),color var(--transition)}
+    .login-btn:hover{background:var(--primary);color:var(--bg)}
+    .hero{position:relative;height:100vh;min-height:600px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .hero-video{position:absolute;top:50%;left:50%;min-width:100%;min-height:100%;transform:translate(-50%,-50%);object-fit:cover;z-index:-2}
+    .hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,17,23,0) 60%,var(--bg) 100%);z-index:-1}
+    .hero-text{text-align:center;max-width:700px;padding:0 1rem;z-index:2}
+    .hero-title{font-family:'Poppins',sans-serif;font-size:clamp(3rem,8vw,5rem);font-weight:700;letter-spacing:2px;text-shadow:0 0 10px var(--primary),0 0 20px var(--accent)}
+    .hero-synopsis{margin:1rem 0 2rem;font-size:1.1rem;color:var(--sub)}
+    .cta-btn{padding:1rem 2.5rem;background:var(--primary);color:var(--bg);border-radius:var(--radius);font-weight:700;font-size:1.1rem;box-shadow:0 0 20px rgba(0,255,255,.5);transition:transform var(--transition),box-shadow var(--transition)}
+    .cta-btn:hover{transform:translateY(-3px);box-shadow:0 0 30px rgba(0,255,255,.7)}
+    .shelves{padding:4rem 1rem 2rem;max-width:1400px;margin:0 auto}
+    .shelf{margin-bottom:3rem}
+    .shelf-title{font-family:'Poppins',sans-serif;font-size:1.5rem;margin-bottom:1rem;letter-spacing:1px}
+    .shelf-scroll{overflow:hidden}
+    .shelf-track{display:flex;gap:1rem;animation:scroll 30s linear infinite}
+    .shelf-item{flex:0 0 auto;width:160px;border-radius:var(--radius);overflow:hidden;position:relative;background:var(--surface);transition:transform var(--transition),box-shadow var(--transition)}
+    .shelf-item:hover{transform:translateY(-6px);box-shadow:0 0 20px rgba(0,255,255,.4)}
+    .shelf-item img{width:100%;display:block}
+    .shelf-meta{padding:.75rem;font-size:.9rem}
+    .shelf-meta .title{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .shelf-meta .ep{color:var(--sub);font-size:.8rem}
+    .new-pill{position:absolute;top:8px;right:8px;background:var(--accent);color:#fff;font-size:.65rem;padding:.2rem .5rem;border-radius:99px;font-weight:700}
+    .footer{border-top:1px solid rgba(255,255,255,.1);padding:2rem 1rem;text-align:center;color:var(--sub)}
+    .footer-container{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+    .socials{display:flex;gap:1rem}
+    .socials a{color:var(--sub);transition:color var(--transition)}
+    .socials a:hover{color:var(--primary)}
+    @keyframes scroll{to{transform:translateX(-50%)}}
+    @media(max-width:900px){.nav-links{display:none}.hero-title{font-size:3rem}.shelf-track{animation:none;overflow-x:auto;scroll-snap-type:x mandatory}.shelf-item{scroll-snap-align:start}}
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">ANIME<span class="logo-accent">NEXUS</span></div>
+    <ul class="nav-links">
+      <li><a href="#">Home</a></li><li><a href="#">Simulcasts</a></li><li><a href="#">Library</a></li><li><a href="#">News</a></li>
+    </ul>
+    <div class="nav-right">
+      <svg class="search-icon" viewBox="0 0 24 24"><path d="M10 2a8 8 0 106.32 13.32l4.2 4.2a1 1 0 001.42-1.42l-4.2-4.2A8 8 0 0010 2zm0 14a6 6 0 110-12 6 6 0 010 12z"/></svg>
+      <button class="login-btn">Sign In</button>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <video autoplay muted loop playsinline class="hero-video">
+    <source src="https://cdn.coverr.co/videos/coverr-a neon cityscape at night-9757/1080p.mp4" type="video/mp4">
+  </video>
+  <div class="hero-overlay"></div>
+  <div class="hero-text">
+    <h1 class="hero-title">CYBER RE:BORN</h1>
+    <p class="hero-synopsis">In 2099 Neo-Kyoto, a rogue AI resurrects a dead hacker to stop an impending digital apocalypse.</p>
+    <button class="cta-btn">Watch Now</button>
+  </div>
+</section>
+
+<main class="shelves">
+  <section class="shelf" data-shelf="trending">
+    <h2 class="shelf-title">Trending Now</h2>
+    <div class="shelf-scroll"><div class="shelf-track"></div></div>
+  </section>
+  <section class="shelf" data-shelf="new">
+    <h2 class="shelf-title">New Episodes Today</h2>
+    <div class="shelf-scroll"><div class="shelf-track"></div></div>
+  </section>
+  <section class="shelf" data-shelf="classics">
+    <h2 class="shelf-title">Must-Watch Classics</h2>
+    <div class="shelf-scroll"><div class="shelf-track"></div></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-container">
+    <small>© 2025 AnimeNEXUS</small>
+    <div class="socials">
+      <a href="#">Twitter</a><a href="#">Discord</a><a href="#">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const posters=[
+{img:"https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",title:"Cyber Re:Born",ep:"Ep 12"},
+{img:"https://image.tmdb.org/t/p/w500/9ggJ2xHtUvwGaHv8xo9kUI9pD3I.jpg",title:"Neon Eclipse",ep:"Ep 8"},
+{img:"https://image.tmdb.org/t/p/w500/gt4ia6IgaLlrmKkTkr8e5L2gKZF.jpg",title:"Ghost in the Shell: SAC_2045",ep:"Ep 24"},
+{img:"https://image.tmdb.org/t/p/w500/sgBlyxjwpRDXJqgvH5buBVGpXqZ.jpg",title:"Akira Remastered",ep:"Movie"},
+{img:"https://image.tmdb.org/t/p/w500/h5pAEVmaJRUF8vKEObT6gz8kR8k.jpg",title:"Steins;Gate 0",ep:"Ep 23"},
+{img:"https://image.tmdb.org/t/p/w500/6KvpEo4Eg4X2f6MNkW6aR2IBYVL.jpg",title:"Chainsaw Man",ep:"Ep 12"}
+];
+function card(an,classic=false){
+  const div=document.createElement('div');div.className='shelf-item';
+  if(classic) div.classList.add('retro');
+  div.innerHTML=`<img src="${an.img}" alt="${an.title}"><div class="shelf-meta"><div class="title">${an.title}</div><div class="ep">${an.ep}</div></div>`;
+  return div;
+}
+['trending','new','classics'].forEach(k=>{
+  const track=document.querySelector(`[data-shelf=${k}] .shelf-track`);
+  posters.forEach(p=>{
+    const c=card(p,k==='classics'); if(k==='new'){const pill=document.createElement('span');pill.className='new-pill';pill.textContent='NEW';c.append(pill);}
+    track.append(c);
+  });
+});
+</script>
+</body>
+</html>
