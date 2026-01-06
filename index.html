@@ -58,9 +58,12 @@
     .video-section{display:grid;grid-template-columns:1fr 300px;gap:2rem;margin-bottom:3rem}
     .video-player{background:var(--surface);border-radius:var(--radius);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
     .video-player iframe{width:100%;height:100%;border:none}
-    .video-info{display:flex;flex-direction:column;gap:1rem}
+    .video-info{display:flex;flex-direction:column;gap:1.5rem}
+    .anime-poster{width:100%;max-width:300px;height:auto;border-radius:var(--radius);box-shadow:0 0 20px rgba(0,255,255,.3);overflow:hidden}
+    .anime-poster img{width:100%;height:auto;display:block}
     .anime-title{font-family:'Poppins',sans-serif;font-size:1.8rem;font-weight:700}
     .episode-num{color:var(--sub);font-size:.95rem}
+    .anime-description{color:var(--sub);font-size:.95rem;line-height:1.6}
     .episodes-list{background:var(--surface);border-radius:var(--radius);padding:1.5rem;max-height:500px;overflow-y:auto}
     .episodes-list h3{margin-bottom:1rem;color:var(--primary)}
     .episode-btn{display:block;width:100%;padding:.75rem;margin-bottom:.5rem;background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.2);border-radius:var(--radius);color:var(--text);text-align:left;cursor:pointer;transition:all var(--transition);font-size:.9rem}
@@ -140,7 +143,7 @@ const animeDatabase={
   'Cyber Re:Born':{img:'https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg',episodes:12,description:'In 2099 Neo-Kyoto, a rogue AI resurrects a dead hacker to stop an impending digital apocalypse.'},
   'Neon Eclipse':{img:'https://image.tmdb.org/t/p/w500/9ggJ2xHtUvwGaHv8xo9kUI9pD3I.jpg',episodes:8,description:'A thrilling cyberpunk journey through neon-lit streets.'},
   'Ghost in the Shell: SAC_2045':{img:'https://image.tmdb.org/t/p/w500/gt4ia6IgaLlrmKkTkr8e5L2gKZF.jpg',episodes:24,description:'The world is in a state of information warfare and the only way to survive is to change.'},
-  'Akira Remastered':{img:'https://image.tmdb.org/t/p/w500/sgBlyxjwpRDXJqgvH5buBVGpXqZ.jpg',episodes:1,description:'A stunning remastered classic that defined cyberpunk anime.'},
+  'Attack on Titan':{img:'https://image.tmdb.org/t/p/w500/uyKnyU6d7bFXIpHlBcV1kqV3F8a.jpg',episodes:25,description:'Humanity fights for survival against giant humanoid titans that eat people.'},
   'Steins;Gate 0':{img:'https://image.tmdb.org/t/p/w500/h5pAEVmaJRUF8vKEObT6gz8kR8k.jpg',episodes:23,description:'The continuation of a legendary time-travel thriller.'},
   'Chainsaw Man':{img:'https://image.tmdb.org/t/p/w500/6KvpEo4Eg4X2f6MNkW6aR2IBYVL.jpg',episodes:12,description:'A devil hunter with a chainsaw for a head fights for survival.'}
 };
@@ -149,7 +152,7 @@ const posters=[
   {title:'Cyber Re:Born',img:'https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg',ep:'Ep 12'},
   {title:'Neon Eclipse',img:'https://image.tmdb.org/t/p/w500/9ggJ2xHtUvwGaHv8xo9kUI9pD3I.jpg',ep:'Ep 8'},
   {title:'Ghost in the Shell: SAC_2045',img:'https://image.tmdb.org/t/p/w500/gt4ia6IgaLlrmKkTkr8e5L2gKZF.jpg',ep:'Ep 24'},
-  {title:'Akira Remastered',img:'https://image.tmdb.org/t/p/w500/sgBlyxjwpRDXJqgvH5buBVGpXqZ.jpg',ep:'Movie'},
+  {title:'Attack on Titan',img:'https://image.tmdb.org/t/p/w500/uyKnyU6d7bFXIpHlBcV1kqV3F8a.jpg',ep:'Ep 25'},
   {title:'Steins;Gate 0',img:'https://image.tmdb.org/t/p/w500/h5pAEVmaJRUF8vKEObT6gz8kR8k.jpg',ep:'Ep 23'},
   {title:'Chainsaw Man',img:'https://image.tmdb.org/t/p/w500/6KvpEo4Eg4X2f6MNkW6aR2IBYVL.jpg',ep:'Ep 12'}
 ];
@@ -166,6 +169,7 @@ function watchAnime(title){
   document.getElementById('watchPage').classList.add('active');
   const anime=animeDatabase[title];
   if(!anime)return;
+  document.getElementById('animePoster').src=anime.img;
   loadEpisodes(title,anime);
   playEpisode(title,1);
 }
@@ -196,6 +200,7 @@ function playEpisode(title,ep){
   player.innerHTML=`<iframe src="https://streamable.com/e/${iframeId}" allowfullscreen></iframe>`;
   document.querySelector('.anime-title').textContent=title;
   document.querySelector('.episode-num').textContent=`Episode ${ep} of ${anime.episodes}`;
+  document.querySelector('.anime-description').textContent=anime.description;
 }
 
 ['trending','new','classics'].forEach(k=>{
@@ -213,8 +218,10 @@ document.querySelector('.watch-container').innerHTML=`
     <div>
       <div class="video-player" id="videoPlayer"></div>
       <div class="video-info">
+        <div class="anime-poster"><img id="animePoster" src="" alt="Anime Poster"></div>
         <h2 class="anime-title"></h2>
         <p class="episode-num"></p>
+        <p class="anime-description"></p>
       </div>
     </div>
     <div class="episodes-list" id="episodesList"></div>
