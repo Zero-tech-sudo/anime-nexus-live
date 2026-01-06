@@ -50,16 +50,35 @@
     .socials a{color:var(--sub);transition:color var(--transition)}
     .socials a:hover{color:var(--primary)}
     @keyframes scroll{to{transform:translateX(-50%)}}
-    @media(max-width:900px){.nav-links{display:none}.hero-title{font-size:3rem}.shelf-track{animation:none;overflow-x:auto;scroll-snap-type:x mandatory}.shelf-item{scroll-snap-align:start}}
+    .watch-page{display:none;padding-top:80px;min-height:100vh}
+    .watch-page.active{display:block}
+    .watch-container{max-width:1400px;margin:0 auto;padding:2rem}
+    .back-btn{display:inline-block;margin-bottom:2rem;padding:.5rem 1rem;border:1px solid var(--primary);border-radius:var(--radius);color:var(--primary);cursor:pointer;transition:all var(--transition)}
+    .back-btn:hover{background:var(--primary);color:var(--bg)}
+    .video-section{display:grid;grid-template-columns:1fr 300px;gap:2rem;margin-bottom:3rem}
+    .video-player{background:var(--surface);border-radius:var(--radius);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+    .video-player iframe{width:100%;height:100%;border:none}
+    .video-info{display:flex;flex-direction:column;gap:1rem}
+    .anime-title{font-family:'Poppins',sans-serif;font-size:1.8rem;font-weight:700}
+    .episode-num{color:var(--sub);font-size:.95rem}
+    .episodes-list{background:var(--surface);border-radius:var(--radius);padding:1.5rem;max-height:500px;overflow-y:auto}
+    .episodes-list h3{margin-bottom:1rem;color:var(--primary)}
+    .episode-btn{display:block;width:100%;padding:.75rem;margin-bottom:.5rem;background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.2);border-radius:var(--radius);color:var(--text);text-align:left;cursor:pointer;transition:all var(--transition);font-size:.9rem}
+    .episode-btn:hover{background:var(--primary);color:var(--bg);border-color:var(--primary)}
+    .episode-btn.active{background:var(--primary);color:var(--bg);border-color:var(--primary)}
+    .home-page{display:block}
+    .home-page.hidden{display:none}
+    @keyframes scroll{to{transform:translateX(-50%)}}
+    @media(max-width:900px){.nav-links{display:none}.hero-title{font-size:3rem}.shelf-track{animation:none;overflow-x:auto;scroll-snap-type:x mandatory}.shelf-item{scroll-snap-align:start}.video-section{grid-template-columns:1fr;gap:1rem}.episodes-list{max-height:300px}}
   </style>
 </head>
 <body>
 
 <nav class="navbar">
   <div class="nav-container">
-    <div class="logo">ANIME<span class="logo-accent">NEXUS</span></div>
+    <div class="logo" onclick="goHome()" style="cursor:pointer">ANIME<span class="logo-accent">NEXUS</span></div>
     <ul class="nav-links">
-      <li><a href="#">Home</a></li><li><a href="#">Simulcasts</a></li><li><a href="#">Library</a></li><li><a href="#">News</a></li>
+      <li><a href="#" onclick="goHome();return false">Home</a></li><li><a href="#" onclick="showAllAnime();return false">Watch</a></li><li><a href="#">Library</a></li><li><a href="#">News</a></li>
     </ul>
     <div class="nav-right">
       <svg class="search-icon" viewBox="0 0 24 24"><path d="M10 2a8 8 0 106.32 13.32l4.2 4.2a1 1 0 001.42-1.42l-4.2-4.2A8 8 0 0010 2zm0 14a6 6 0 110-12 6 6 0 010 12z"/></svg>
@@ -76,24 +95,36 @@
   <div class="hero-text">
     <h1 class="hero-title">CYBER RE:BORN</h1>
     <p class="hero-synopsis">In 2099 Neo-Kyoto, a rogue AI resurrects a dead hacker to stop an impending digital apocalypse.</p>
-    <button class="cta-btn">Watch Now</button>
+    <button class="cta-btn" onclick="watchAnime('Cyber Re:Born')">Watch Now</button>
   </div>
 </section>
 
-<main class="shelves">
-  <section class="shelf" data-shelf="trending">
-    <h2 class="shelf-title">Trending Now</h2>
-    <div class="shelf-scroll"><div class="shelf-track"></div></div>
-  </section>
-  <section class="shelf" data-shelf="new">
-    <h2 class="shelf-title">New Episodes Today</h2>
-    <div class="shelf-scroll"><div class="shelf-track"></div></div>
-  </section>
-  <section class="shelf" data-shelf="classics">
-    <h2 class="shelf-title">Must-Watch Classics</h2>
-    <div class="shelf-scroll"><div class="shelf-track"></div></div>
-  </section>
+<main class="home-page" id="homePage">
+  <div class="shelves">
+    <section class="shelf" data-shelf="trending">
+      <h2 class="shelf-title">Trending Now</h2>
+      <div class="shelf-scroll"><div class="shelf-track"></div></div>
+    </section>
+    <section class="shelf" data-shelf="new">
+      <h2 class="shelf-title">New Episodes Today</h2>
+      <div class="shelf-scroll"><div class="shelf-track"></div></div>
+    </section>
+    <section class="shelf" data-shelf="classics">
+      <h2 class="shelf-title">Must-Watch Classics</h2>
+      <div class="shelf-scroll"><div class="shelf-track"></div></div>
+    </section>
+  </div>
 </main>
+
+<div class="watch-page" id="watchPage">
+  <div class="watch-container">
+    <button class="back-btn" onclick="goHome()">← Back to Home</button>
+    <div class="video-section">
+      <div class="video-player" id="videoPlayer"></div>
+      <div class="episodes-list" id="episodesList"></div>
+    </div>
+  </div>
+</div>
 
 <footer class="footer">
   <div class="footer-container">
@@ -105,27 +136,90 @@
 </footer>
 
 <script>
+const animeDatabase={
+  'Cyber Re:Born':{img:'https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg',episodes:12,description:'In 2099 Neo-Kyoto, a rogue AI resurrects a dead hacker to stop an impending digital apocalypse.'},
+  'Neon Eclipse':{img:'https://image.tmdb.org/t/p/w500/9ggJ2xHtUvwGaHv8xo9kUI9pD3I.jpg',episodes:8,description:'A thrilling cyberpunk journey through neon-lit streets.'},
+  'Ghost in the Shell: SAC_2045':{img:'https://image.tmdb.org/t/p/w500/gt4ia6IgaLlrmKkTkr8e5L2gKZF.jpg',episodes:24,description:'The world is in a state of information warfare and the only way to survive is to change.'},
+  'Akira Remastered':{img:'https://image.tmdb.org/t/p/w500/sgBlyxjwpRDXJqgvH5buBVGpXqZ.jpg',episodes:1,description:'A stunning remastered classic that defined cyberpunk anime.'},
+  'Steins;Gate 0':{img:'https://image.tmdb.org/t/p/w500/h5pAEVmaJRUF8vKEObT6gz8kR8k.jpg',episodes:23,description:'The continuation of a legendary time-travel thriller.'},
+  'Chainsaw Man':{img:'https://image.tmdb.org/t/p/w500/6KvpEo4Eg4X2f6MNkW6aR2IBYVL.jpg',episodes:12,description:'A devil hunter with a chainsaw for a head fights for survival.'}
+};
+
 const posters=[
-{img:"https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",title:"Cyber Re:Born",ep:"Ep 12"},
-{img:"https://image.tmdb.org/t/p/w500/9ggJ2xHtUvwGaHv8xo9kUI9pD3I.jpg",title:"Neon Eclipse",ep:"Ep 8"},
-{img:"https://image.tmdb.org/t/p/w500/gt4ia6IgaLlrmKkTkr8e5L2gKZF.jpg",title:"Ghost in the Shell: SAC_2045",ep:"Ep 24"},
-{img:"https://image.tmdb.org/t/p/w500/sgBlyxjwpRDXJqgvH5buBVGpXqZ.jpg",title:"Akira Remastered",ep:"Movie"},
-{img:"https://image.tmdb.org/t/p/w500/h5pAEVmaJRUF8vKEObT6gz8kR8k.jpg",title:"Steins;Gate 0",ep:"Ep 23"},
-{img:"https://image.tmdb.org/t/p/w500/6KvpEo4Eg4X2f6MNkW6aR2IBYVL.jpg",title:"Chainsaw Man",ep:"Ep 12"}
+  {title:'Cyber Re:Born',img:'https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg',ep:'Ep 12'},
+  {title:'Neon Eclipse',img:'https://image.tmdb.org/t/p/w500/9ggJ2xHtUvwGaHv8xo9kUI9pD3I.jpg',ep:'Ep 8'},
+  {title:'Ghost in the Shell: SAC_2045',img:'https://image.tmdb.org/t/p/w500/gt4ia6IgaLlrmKkTkr8e5L2gKZF.jpg',ep:'Ep 24'},
+  {title:'Akira Remastered',img:'https://image.tmdb.org/t/p/w500/sgBlyxjwpRDXJqgvH5buBVGpXqZ.jpg',ep:'Movie'},
+  {title:'Steins;Gate 0',img:'https://image.tmdb.org/t/p/w500/h5pAEVmaJRUF8vKEObT6gz8kR8k.jpg',ep:'Ep 23'},
+  {title:'Chainsaw Man',img:'https://image.tmdb.org/t/p/w500/6KvpEo4Eg4X2f6MNkW6aR2IBYVL.jpg',ep:'Ep 12'}
 ];
-function card(an,classic=false){
-  const div=document.createElement('div');div.className='shelf-item';
-  if(classic) div.classList.add('retro');
+
+function card(an){
+  const div=document.createElement('div');div.className='shelf-item';div.style.cursor='pointer';
   div.innerHTML=`<img src="${an.img}" alt="${an.title}"><div class="shelf-meta"><div class="title">${an.title}</div><div class="ep">${an.ep}</div></div>`;
+  div.onclick=()=>watchAnime(an.title);
   return div;
 }
+
+function watchAnime(title){
+  document.getElementById('homePage').classList.add('hidden');
+  document.getElementById('watchPage').classList.add('active');
+  const anime=animeDatabase[title];
+  if(!anime)return;
+  loadEpisodes(title,anime);
+  playEpisode(title,1);
+}
+
+function goHome(){
+  document.getElementById('watchPage').classList.remove('active');
+  document.getElementById('homePage').classList.remove('hidden');
+}
+
+function loadEpisodes(title,anime){
+  const list=document.getElementById('episodesList');
+  list.innerHTML=`<h3>${title}</h3>`;
+  for(let i=1;i<=anime.episodes;i++){
+    const btn=document.createElement('button');
+    btn.className='episode-btn';if(i===1)btn.classList.add('active');
+    btn.textContent=`Episode ${i}`;
+    btn.onclick=()=>playEpisode(title,i);
+    list.appendChild(btn);
+  }
+}
+
+function playEpisode(title,ep){
+  const player=document.getElementById('videoPlayer');
+  const anime=animeDatabase[title];
+  document.querySelector('.episode-btn.active')?.classList.remove('active');
+  document.querySelectorAll('.episode-btn')[ep-1]?.classList.add('active');
+  const iframeId=`${title.replace(/[^a-z0-9]/gi,'').toLowerCase()}ep${ep}`;
+  player.innerHTML=`<iframe src="https://streamable.com/e/${iframeId}" allowfullscreen></iframe>`;
+  document.querySelector('.anime-title').textContent=title;
+  document.querySelector('.episode-num').textContent=`Episode ${ep} of ${anime.episodes}`;
+}
+
 ['trending','new','classics'].forEach(k=>{
   const track=document.querySelector(`[data-shelf=${k}] .shelf-track`);
   posters.forEach(p=>{
-    const c=card(p,k==='classics'); if(k==='new'){const pill=document.createElement('span');pill.className='new-pill';pill.textContent='NEW';c.append(pill);}
+    const c=card(p);
+    if(k==='new'){const pill=document.createElement('span');pill.className='new-pill';pill.textContent='NEW';c.append(pill);}
     track.append(c);
   });
 });
+
+document.querySelector('.watch-container').innerHTML=`
+  <button class="back-btn" onclick="goHome()">← Back to Home</button>
+  <div class="video-section">
+    <div>
+      <div class="video-player" id="videoPlayer"></div>
+      <div class="video-info">
+        <h2 class="anime-title"></h2>
+        <p class="episode-num"></p>
+      </div>
+    </div>
+    <div class="episodes-list" id="episodesList"></div>
+  </div>
+`;
 </script>
 </body>
 </html>
