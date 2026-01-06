@@ -58,6 +58,7 @@
     .video-section{display:grid;grid-template-columns:1fr 300px;gap:2rem;margin-bottom:3rem}
     .video-player{background:var(--surface);border-radius:var(--radius);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
     .video-player iframe{width:100%;height:100%;border:none}
+    .video-player video{width:100%;height:100%;border:none;object-fit:contain}
     .video-info{display:flex;flex-direction:column;gap:1.5rem}
     .anime-poster{width:100%;max-width:300px;height:auto;border-radius:var(--radius);box-shadow:0 0 20px rgba(0,255,255,.3);overflow:hidden}
     .anime-poster img{width:100%;height:auto;display:block}
@@ -196,8 +197,16 @@ function playEpisode(title,ep){
   const anime=animeDatabase[title];
   document.querySelector('.episode-btn.active')?.classList.remove('active');
   document.querySelectorAll('.episode-btn')[ep-1]?.classList.add('active');
-  const iframeId=`${title.replace(/[^a-z0-9]/gi,'').toLowerCase()}ep${ep}`;
-  player.innerHTML=`<iframe src="https://streamable.com/e/${iframeId}" allowfullscreen></iframe>`;
+  
+  // Demo video URLs - using working sample videos
+  const videoUrl='https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4';
+  
+  player.innerHTML=`
+    <video width="100%" height="100%" controls style="background:#000">
+      <source src="${videoUrl}" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  `;
   document.querySelector('.anime-title').textContent=title;
   document.querySelector('.episode-num').textContent=`Episode ${ep} of ${anime.episodes}`;
   document.querySelector('.anime-description').textContent=anime.description;
