@@ -43,8 +43,34 @@
     .shelf-meta{padding:.75rem;font-size:.9rem}
     .shelf-meta .title{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .shelf-meta .ep{color:var(--sub);font-size:.8rem}
-    .new-pill{position:absolute;top:8px;right:8px;background:var(--accent);color:#fff;font-size:.65rem;padding:.2rem .5rem;border-radius:99px;font-weight:700}
-    .footer{border-top:1px solid rgba(255,255,255,.1);padding:2rem 1rem;text-align:center;color:var(--sub)}
+    .upload-btn{padding:.5rem 1rem;background:var(--accent);color:#fff;border-radius:var(--radius);font-weight:600;cursor:pointer;transition:all var(--transition)}
+    .upload-btn:hover{transform:translateY(-2px);box-shadow:0 0 15px rgba(255,0,102,.5)}
+    .upload-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:200;align-items:center;justify-content:center}
+    .upload-modal.active{display:flex}
+    .upload-form{background:var(--surface);border-radius:var(--radius);padding:2rem;max-width:600px;width:90%}
+    .upload-form h2{margin-bottom:1.5rem;color:var(--primary)}
+    .form-group{margin-bottom:1.5rem}
+    .form-group label{display:block;margin-bottom:.5rem;font-weight:600}
+    .form-group input,.form-group textarea{width:100%;padding:.75rem;background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:var(--radius);color:var(--text);font-family:inherit;font-size:.95rem}
+    .form-group textarea{resize:vertical;min-height:80px}
+    .file-input-wrapper{position:relative;overflow:hidden;display:inline-block;width:100%}
+    .file-input-wrapper input{position:absolute;left:-9999px}
+    .file-input-label{display:block;padding:.75rem;background:rgba(0,255,255,.1);border:2px dashed var(--primary);border-radius:var(--radius);text-align:center;cursor:pointer;transition:all var(--transition)}
+    .file-input-label:hover{background:rgba(0,255,255,.2)}
+    .file-input-label.dragover{background:rgba(0,255,255,.3)}
+    .form-buttons{display:flex;gap:1rem;justify-content:flex-end}
+    .btn-submit{padding:.75rem 1.5rem;background:var(--primary);color:var(--bg);border-radius:var(--radius);font-weight:600;cursor:pointer;transition:all var(--transition)}
+    .btn-submit:hover{transform:translateY(-2px);box-shadow:0 0 15px rgba(0,255,255,.5)}
+    .btn-cancel{padding:.75rem 1.5rem;background:transparent;border:1px solid var(--sub);color:var(--sub);border-radius:var(--radius);font-weight:600;cursor:pointer;transition:all var(--transition)}
+    .btn-cancel:hover{color:var(--primary);border-color:var(--primary)}
+    .uploaded-videos{margin-top:2rem}
+    .uploaded-videos h3{color:var(--primary);margin-bottom:1rem}
+    .video-item{background:rgba(0,255,255,.05);padding:1rem;border-radius:var(--radius);margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center}
+    .video-item-info{flex:1}
+    .video-item-title{font-weight:600}
+    .video-item-size{color:var(--sub);font-size:.85rem}
+    .btn-delete{padding:.35rem .75rem;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);cursor:pointer;font-size:.85rem;transition:all var(--transition)}
+    .btn-delete:hover{transform:translateY(-1px);box-shadow:0 0 10px rgba(255,0,102,.5)}
     .footer-container{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
     .socials{display:flex;gap:1rem}
     .socials a{color:var(--sub);transition:color var(--transition)}
@@ -86,6 +112,7 @@
     </ul>
     <div class="nav-right">
       <svg class="search-icon" viewBox="0 0 24 24"><path d="M10 2a8 8 0 106.32 13.32l4.2 4.2a1 1 0 001.42-1.42l-4.2-4.2A8 8 0 0010 2zm0 14a6 6 0 110-12 6 6 0 010 12z"/></svg>
+      <button class="upload-btn" onclick="openUploadModal()">📤 Upload Video</button>
       <button class="login-btn">Sign In</button>
     </div>
   </div>
@@ -130,6 +157,38 @@
   </div>
 </div>
 
+<div class="upload-modal" id="uploadModal">
+  <div class="upload-form">
+    <h2>Upload Anime Video</h2>
+    <div class="form-group">
+      <label for="animeTitle">Anime Title</label>
+      <input type="text" id="animeTitle" placeholder="e.g., My Anime Show">
+    </div>
+    <div class="form-group">
+      <label for="episodeNum">Episode Number</label>
+      <input type="number" id="episodeNum" min="1" placeholder="1">
+    </div>
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" placeholder="Describe this episode..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Video File</label>
+      <div class="file-input-wrapper">
+        <label class="file-input-label" for="videoFile" id="dragZone">
+          <span>📁 Click to upload or drag & drop (MP4, MKV, WebM)</span>
+        </label>
+        <input type="file" id="videoFile" accept="video/*">
+      </div>
+      <div id="uploadedVideos" class="uploaded-videos"></div>
+    </div>
+    <div class="form-buttons">
+      <button class="btn-cancel" onclick="closeUploadModal()">Cancel</button>
+      <button class="btn-submit" onclick="uploadVideo()">Upload</button>
+    </div>
+  </div>
+</div>
+
 <footer class="footer">
   <div class="footer-container">
     <small>© 2025 AnimeNEXUS</small>
@@ -140,6 +199,28 @@
 </footer>
 
 <script>
+// IndexedDB for storing uploaded videos
+const dbName='AnimeNexusDB';
+const storeName='videos';
+let db;
+
+// Initialize database
+const openDB=()=>{
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(dbName,1);
+    req.onerror=()=>reject(req.error);
+    req.onsuccess=()=>resolve(req.result);
+    req.onupgradeneeded=(e)=>{
+      const database=e.target.result;
+      if(!database.objectStoreNames.contains(storeName)){
+        database.createObjectStore(storeName,{keyPath:'id',autoIncrement:true});
+      }
+    };
+  });
+};
+
+openDB().then(d=>{db=d;loadUploadedVideos();addSampleVideos();});
+
 const animeDatabase={
   'Cyber Re:Born':{img:'https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg',episodes:12,description:'In 2099 Neo-Kyoto, a rogue AI resurrects a dead hacker to stop an impending digital apocalypse.'},
   'Neon Eclipse':{img:'https://image.tmdb.org/t/p/w500/9ggJ2xHtUvwGaHv8xo9kUI9pD3I.jpg',episodes:8,description:'A thrilling cyberpunk journey through neon-lit streets.'},
@@ -158,6 +239,116 @@ const posters=[
   {title:'Chainsaw Man',img:'https://image.tmdb.org/t/p/w500/6KvpEo4Eg4X2f6MNkW6aR2IBYVL.jpg',ep:'Ep 12'}
 ];
 
+function openUploadModal(){document.getElementById('uploadModal').classList.add('active');}
+function closeUploadModal(){document.getElementById('uploadModal').classList.remove('active');}
+
+const dragZone=document.getElementById('dragZone');
+const videoFile=document.getElementById('videoFile');
+['dragenter','dragover'].forEach(e=>dragZone.addEventListener(e,()=>dragZone.classList.add('dragover')));
+['dragleave','drop'].forEach(e=>dragZone.addEventListener(e,()=>dragZone.classList.remove('dragover')));
+dragZone.addEventListener('drop',(e)=>{e.preventDefault();if(e.dataTransfer.files[0])videoFile.files=e.dataTransfer.files;});
+
+function uploadVideo(){
+  const title=document.getElementById('animeTitle').value.trim();
+  const ep=parseInt(document.getElementById('episodeNum').value);
+  const desc=document.getElementById('description').value.trim();
+  const file=document.getElementById('videoFile').files[0];
+  
+  if(!title||!ep||!file)return alert('Please fill all fields and select a video');
+  
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    const video={id:Date.now(),title,ep,desc,blob:e.target.result,size:(file.size/1024/1024).toFixed(2)};
+    const tx=db.transaction(storeName,'readwrite');
+    tx.objectStore(storeName).add(video);
+    tx.oncomplete=()=>{
+      document.getElementById('animeTitle').value='';
+      document.getElementById('episodeNum').value='';
+      document.getElementById('description').value='';
+      document.getElementById('videoFile').value='';
+      loadUploadedVideos();
+      closeUploadModal();
+      alert('Video uploaded successfully!');
+    };
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function loadUploadedVideos(){
+  if(!db)return;
+  const tx=db.transaction(storeName,'readonly');
+  const req=tx.objectStore(storeName).getAll();
+  req.onsuccess=()=>{
+    const html=req.result.length?'<h3>Your Uploaded Videos</h3>'+req.result.map(v=>`
+      <div class="video-item">
+        <div class="video-item-info">
+          <div class="video-item-title">${v.title} - Ep ${v.ep}</div>
+          <div class="video-item-size">${v.size} MB</div>
+        </div>
+        <button class="btn-delete" onclick="deleteVideo(${v.id})">Delete</button>
+      </div>
+    `).join(''):'';
+    document.getElementById('uploadedVideos').innerHTML=html;
+  };
+}
+
+function addSampleVideos(){
+  if(!db)return;
+  const tx=db.transaction(storeName,'readonly');
+  const req=tx.objectStore(storeName).getAll();
+  req.onsuccess=()=>{
+    if(req.result.length===0){
+      const samples=[
+        {title:'Demon Slayer',ep:1,desc:'Tanjiro and Nezuko embark on a journey to find a cure for Nezuko\'s demon curse.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4'},
+        {title:'Demon Slayer',ep:2,desc:'Tanjiro enters the Final Selection exam to become a Demon Slayer.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ElephantsDream.mp4'},
+        {title:'Jujutsu Kaisen',ep:1,desc:'Yuji Itadori becomes the host of Ryomen Sukuna, the King of Curses.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ForBiggerBlazes.mp4'},
+        {title:'Jujutsu Kaisen',ep:2,desc:'Yuji meets Gojo and learns about the Jujutsu world.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4'},
+        {title:'My Hero Academia',ep:1,desc:'Deku dreams of becoming a hero despite being powerless in a superpowered world.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ElephantsDream.mp4'},
+        {title:'My Hero Academia',ep:2,desc:'All Might gives Deku a chance at becoming a hero.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ForBiggerBlazes.mp4'},
+        {title:'Death Note',ep:1,desc:'Light Yagami discovers a notebook with the power to kill anyone.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4'},
+        {title:'Death Note',ep:2,desc:'Light uses the Death Note to eliminate criminals.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ElephantsDream.mp4'},
+        {title:'One Punch Man',ep:1,desc:'Saitama, an overpowered hero, searches for worthy opponents.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ForBiggerBlazes.mp4'},
+        {title:'One Punch Man',ep:2,desc:'Saitama meets Genos, a cyborg seeking his mentorship.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4'}
+      ];
+      
+      samples.forEach((s,i)=>{
+        fetch(s.video)
+          .then(r=>r.arrayBuffer())
+          .then(blob=>{
+            const video={id:10000+i,title:s.title,ep:s.ep,desc:s.desc,blob:blob,size:'2.50'};
+            const tx2=db.transaction(storeName,'readwrite');
+            tx2.objectStore(storeName).add(video);
+            tx2.oncomplete=()=>{if(i===samples.length-1)loadUploadedVideos();};
+          });
+      });
+    }
+  };
+}
+
+function deleteVideo(id){
+  if(!db)return;
+  const tx=db.transaction(storeName,'readwrite');
+  tx.objectStore(storeName).delete(id);
+  tx.oncomplete=()=>{loadUploadedVideos();};
+}
+
+function playUploadedVideo(id){
+  if(!db)return;
+  const tx=db.transaction(storeName,'readonly');
+  const req=tx.objectStore(storeName).get(id);
+  req.onsuccess=()=>{
+    const video=req.result;
+    if(!video)return;
+    const blob=new Blob([video.blob],{type:'video/mp4'});
+    const url=URL.createObjectURL(blob);
+    const player=document.getElementById('videoPlayer');
+    player.innerHTML=`<video width="100%" height="100%" controls style="background:#000"><source src="${url}" type="video/mp4"></video>`;
+    document.querySelector('.anime-title').textContent=video.title;
+    document.querySelector('.episode-num').textContent=`Episode ${video.ep}`;
+    document.querySelector('.anime-description').textContent=video.desc;
+  };
+}
+
 function card(an){
   const div=document.createElement('div');div.className='shelf-item';div.style.cursor='pointer';
   div.innerHTML=`<img src="${an.img}" alt="${an.title}"><div class="shelf-meta"><div class="title">${an.title}</div><div class="ep">${an.ep}</div></div>`;
@@ -170,7 +361,6 @@ function watchAnime(title){
   document.getElementById('watchPage').classList.add('active');
   const anime=animeDatabase[title];
   if(!anime)return;
-  document.getElementById('animePoster').src=anime.img;
   loadEpisodes(title,anime);
   playEpisode(title,1);
 }
@@ -183,9 +373,29 @@ function goHome(){
 function loadEpisodes(title,anime){
   const list=document.getElementById('episodesList');
   list.innerHTML=`<h3>${title}</h3>`;
+  
+  // Load uploaded episodes for this anime
+  if(db){
+    const tx=db.transaction(storeName,'readonly');
+    const req=tx.objectStore(storeName).getAll();
+    req.onsuccess=()=>{
+      const uploaded=req.result.filter(v=>v.title===title);
+      uploaded.forEach(v=>{
+        const btn=document.createElement('button');
+        btn.className='episode-btn';
+        btn.textContent=`Episode ${v.ep} ⬆️`;
+        btn.style.background='rgba(255,0,102,.2)';
+        btn.style.borderColor='rgba(255,0,102,.5)';
+        btn.onclick=()=>playUploadedVideo(v.id);
+        list.appendChild(btn);
+      });
+    };
+  }
+  
+  // Load default episodes
   for(let i=1;i<=anime.episodes;i++){
     const btn=document.createElement('button');
-    btn.className='episode-btn';if(i===1)btn.classList.add('active');
+    btn.className='episode-btn';if(i===1&&!document.querySelector('.episode-btn.active'))btn.classList.add('active');
     btn.textContent=`Episode ${i}`;
     btn.onclick=()=>playEpisode(title,i);
     list.appendChild(btn);
@@ -197,16 +407,8 @@ function playEpisode(title,ep){
   const anime=animeDatabase[title];
   document.querySelector('.episode-btn.active')?.classList.remove('active');
   document.querySelectorAll('.episode-btn')[ep-1]?.classList.add('active');
-  
-  // Demo video URLs - using working sample videos
   const videoUrl='https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4';
-  
-  player.innerHTML=`
-    <video width="100%" height="100%" controls style="background:#000">
-      <source src="${videoUrl}" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-  `;
+  player.innerHTML=`<video width="100%" height="100%" controls style="background:#000"><source src="${videoUrl}" type="video/mp4">Your browser does not support the video tag.</video>`;
   document.querySelector('.anime-title').textContent=title;
   document.querySelector('.episode-num').textContent=`Episode ${ep} of ${anime.episodes}`;
   document.querySelector('.anime-description').textContent=anime.description;
@@ -227,7 +429,6 @@ document.querySelector('.watch-container').innerHTML=`
     <div>
       <div class="video-player" id="videoPlayer"></div>
       <div class="video-info">
-        <div class="anime-poster"><img id="animePoster" src="" alt="Anime Poster"></div>
         <h2 class="anime-title"></h2>
         <p class="episode-num"></p>
         <p class="anime-description"></p>
