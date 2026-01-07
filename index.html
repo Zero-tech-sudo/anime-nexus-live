@@ -435,16 +435,16 @@ function addSampleVideos(){
   req.onsuccess=()=>{
     if(req.result.length===0){
       const samples=[
-        {title:'Demon Slayer',ep:1,desc:'Tanjiro and Nezuko embark on a journey to find a cure for Nezuko\'s demon curse.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4'},
-        {title:'Demon Slayer',ep:2,desc:'Tanjiro enters the Final Selection exam to become a Demon Slayer.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ElephantsDream.mp4'},
-        {title:'Jujutsu Kaisen',ep:1,desc:'Yuji Itadori becomes the host of Ryomen Sukuna, the King of Curses.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ForBiggerBlazes.mp4'},
-        {title:'Jujutsu Kaisen',ep:2,desc:'Yuji meets Gojo and learns about the Jujutsu world.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4'},
-        {title:'My Hero Academia',ep:1,desc:'Deku dreams of becoming a hero despite being powerless in a superpowered world.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ElephantsDream.mp4'},
-        {title:'My Hero Academia',ep:2,desc:'All Might gives Deku a chance at becoming a hero.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ForBiggerBlazes.mp4'},
-        {title:'Death Note',ep:1,desc:'Light Yagami discovers a notebook with the power to kill anyone.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4'},
-        {title:'Death Note',ep:2,desc:'Light uses the Death Note to eliminate criminals.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ElephantsDream.mp4'},
-        {title:'One Punch Man',ep:1,desc:'Saitama, an overpowered hero, searches for worthy opponents.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ForBiggerBlazes.mp4'},
-        {title:'One Punch Man',ep:2,desc:'Saitama meets Genos, a cyborg seeking his mentorship.',video:'https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4'}
+        {title:'Demon Slayer',ep:1,desc:'Tanjiro and Nezuko embark on a journey to find a cure for Nezuko\'s demon curse.',video:'https://www.w3schools.com/html/mov_bbb.mp4'},
+        {title:'Demon Slayer',ep:2,desc:'Tanjiro enters the Final Selection exam to become a Demon Slayer.',video:'https://www.w3schools.com/html/mov_bbb.mp4'},
+        {title:'Jujutsu Kaisen',ep:1,desc:'Yuji Itadori becomes the host of Ryomen Sukuna, the King of Curses.',video:'https://www.w3schools.com/html/mov_bbb.mp4'},
+        {title:'Jujutsu Kaisen',ep:2,desc:'Yuji meets Gojo and learns about the Jujutsu world.',video:'https://www.w3schools.com/html/mov_bbb.mp4'},
+        {title:'My Hero Academia',ep:1,desc:'Deku dreams of becoming a hero despite being powerless in a superpowered world.',video:'https://www.w3schools.com/html/mov_bbb.mp4'},
+        {title:'My Hero Academia',ep:2,desc:'All Might gives Deku a chance at becoming a hero.',video:'https://www.w3schools.com/html/mov_bbb.mp4'},
+        {title:'Death Note',ep:1,desc:'Light Yagami discovers a notebook with the power to kill anyone.',video:'https://www.w3schools.com/html/mov_bbb.mp4'},
+        {title:'Death Note',ep:2,desc:'Light uses the Death Note to eliminate criminals.',video:'https://www.w3schools.com/html/mov_bbb.mp4'},
+        {title:'One Punch Man',ep:1,desc:'Saitama, an overpowered hero, searches for worthy opponents.',video:'https://www.w3schools.com/html/mov_bbb.mp4'},
+        {title:'One Punch Man',ep:2,desc:'Saitama meets Genos, a cyborg seeking his mentorship.',video:'https://www.w3schools.com/html/mov_bbb.mp4'}
       ];
       
       samples.forEach((s,i)=>{
@@ -543,7 +543,7 @@ function playEpisode(title,ep){
   const anime=animeDatabase[title];
   document.querySelector('.episode-btn.active')?.classList.remove('active');
   document.querySelectorAll('.episode-btn')[ep-1]?.classList.add('active');
-  const videoUrl='https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4';
+  const videoUrl='https://www.w3schools.com/html/mov_bbb.mp4';
   player.innerHTML=`<video width="100%" height="100%" controls style="background:#000"><source src="${videoUrl}" type="video/mp4">Your browser does not support the video tag.</video>`;
   document.querySelector('.anime-title').textContent=title;
   document.querySelector('.episode-num').textContent=`Episode ${ep} of ${anime.episodes}`;
